@@ -1,0 +1,25 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+const {
+  title = 'higa1234\'s Tech Blog(β)',
+  description = '技術メモと学習記録をまとめるブログです。',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+
+  <body>
+    <Header />
+    <slot />
+    <Footer />
+  </body>
+</html>
