@@ -5,7 +5,7 @@ pubDate: 2026-06-04
 tags: ["PostgreSQL", "Database"]
 ---
 
-# PostgreSQLの学習メモを残していく
+## PostgreSQLの学習メモを残していく
 
 このブログでは、PostgreSQLについて調べたことも整理していきます。
 

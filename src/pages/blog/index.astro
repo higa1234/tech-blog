@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const posts = await getCollection('blog');
+
+const sortedPosts = posts.sort((a, b) => {
+  return b.data.pubDate.getTime() - a.data.pubDate.getTime();
+});
+---
+
+<BaseLayout
+  title="記事一覧 | My Tech Blog"
+  description="技術ブログの記事一覧ページです。"
+>
+  <main>
+    <section class="page-header">
+      <h1>記事一覧</h1>
+      <p>PostgreSQL、Web開発、開発環境などの学習メモをまとめています。</p>
+    </section>
+
+    <section class="post-list">
+      {
+        sortedPosts.map((post) => (
+          <article class="post-card">
+            <p class="post-card__date">
+              {post.data.pubDate.toLocaleDateString('ja-JP')}
+            </p>
+
+            <h2 class="post-card__title">
+              <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+            </h2>
+
+            <p class="post-card__description">
+              {post.data.description}
+            </p>
+
+            {
+              post.data.tags.length > 0 && (
+                <ul class="tag-list">
+                  {post.data.tags.map((tag) => (
+                    <li>{tag}</li>
+                  ))}
+                </ul>
+              )
+            }
+          </article>
+        ))
+      }
+    </section>
+  </main>
+</BaseLayout>

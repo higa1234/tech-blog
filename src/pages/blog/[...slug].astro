@@ -1,0 +1,119 @@
+---
+/**
+ * ブログ記事の詳細ページ
+ *
+ * このファイルは、以下のようなURLを自動生成するためのページです。
+ *
+ * 例:
+ * - /blog/first-post/
+ * - /blog/postgresql-note/
+ *
+ * ファイル名が [...slug].astro なので、
+ * slug の部分が記事ごとに変わる「動的ページ」になります。
+ */
+
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+/**
+ * getStaticPaths()
+ *
+ * Astro の静的サイト生成では、動的ページを使う場合、
+ * 「どのURLを事前に作るか」をここで指定する必要があります。
+ *
+ * 今回は src/content/blog 配下の Markdown 記事を取得し、
+ * 記事ごとに /blog/{記事ID}/ のページを作ります。
+ */
+export async function getStaticPaths() {
+  // blog collection に登録されている Markdown 記事をすべて取得する
+  const posts = await getCollection('blog');
+
+  // 取得した記事の数だけ、詳細ページのURLを作る
+  return posts.map((post) => ({
+    /**
+     * params は URL の動的部分に入る値です。
+     *
+     * このファイル名は [...slug].astro なので、
+     * params.slug に入れた値が URL の slug 部分になります。
+     *
+     * 例:
+     * post.id が "first-post" の場合
+     * → /blog/first-post/ が生成される
+     */
+    params: {
+      slug: post.id,
+    },
+
+    /**
+     * props は、このページ本体で使いたいデータです。
+     *
+     * ここでは記事データそのものを post という名前で渡しています。
+     * 下の `const { post } = Astro.props;` で受け取ります。
+     */
+    props: {
+      post,
+    },
+  }));
+}
+
+/**
+ * getStaticPaths() の props で渡した post を受け取る
+ *
+ * post には以下のような情報が入っています。
+ * - post.data.title
+ * - post.data.description
+ * - post.data.pubDate
+ * - post.data.tags
+ * - Markdown本文
+ */
+const { post } = Astro.props;
+
+/**
+ * Markdown本文を Astro コンポーネントとして描画できる形に変換する
+ *
+ * Content は、Markdown本文を表示するためのコンポーネントです。
+ * 下の <Content /> の場所に、記事本文が表示されます。
+ */
+const { Content } = await render(post);
+---
+
+<BaseLayout
+  title={`${post.data.title} | My Tech Blog`}
+  description={post.data.description}
+>
+  <main>
+    <article class="article">
+      <!-- 記事の上部エリア：日付、タイトル、説明、タグを表示する -->
+      <header class="article__header">
+        <!-- 公開日を日本向けの日付形式で表示する -->
+        <p class="article__date">
+          {post.data.pubDate.toLocaleDateString('ja-JP')}
+        </p>
+
+        <!-- 記事タイトル -->
+        <h1>{post.data.title}</h1>
+
+        <!-- 記事の説明文 -->
+        <p class="article__description">
+          {post.data.description}
+        </p>
+
+        <!-- タグがある場合だけ、タグ一覧を表示する -->
+        {
+          post.data.tags.length > 0 && (
+            <ul class="tag-list">
+              {post.data.tags.map((tag) => (
+                <li>{tag}</li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      <!-- Markdown本文を表示するエリア -->
+      <div class="article__body">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BaseLayout>
