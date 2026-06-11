@@ -1,5 +1,10 @@
-import { defineCollection, z } from 'astro:content';
+// Astro の Content Collections を定義するための関数
+import { defineCollection } from 'astro:content';
+// Markdown ファイルなどをまとめて読み込むための loader
 import { glob } from 'astro/loaders';
+// frontmatter の型チェックに使う Zod
+// Astro v6 系では astro:content から z を import せず、zod から直接 import する
+import { z } from 'zod';
 
 /**
  * PostgreSQL技術ブログの記事コレクション
@@ -17,7 +22,7 @@ const blog = defineCollection({
    * 各記事のfrontmatterの型定義
    *
    * ここで定義した項目に合わない記事は、
-   * ビルド時や開発サーバー起動時にエラーになります。
+   * ビルド時や開発サーバー起動時にエラーになる。
    */
   schema: z.object({
     /**
@@ -77,7 +82,7 @@ const blog = defineCollection({
       .array(
         z.object({
           label: z.string(),
-          url: z.string().url(),
+          url: z.url(),
         }),
       )
       .optional(),
@@ -92,6 +97,8 @@ const blog = defineCollection({
   }),
 });
 
+// Astro に blog コレクションを登録
+// getCollection('blog') のように呼び出せるようになる
 export const collections = {
   blog,
 };
