@@ -1,10 +1,71 @@
 ---
+import { getCollection } from 'astro:content';
+
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/blog.css';
+
+// blog コレクションから記事を取得
+// draft: true の記事は一覧に出さない
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort(
+    (a, b) =>
+      b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+  );
+
+// 日付を yyyy/mm/dd 形式で表示するための関数
+const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+};
 ---
 
-<BaseLayout title="トップページ">
-  <main>
-    <h1>技術ブログ</h1>
-    <p>Astroで作る技術ブログです。</p>
+<BaseLayout title="記事一覧 | PostgreSQL Note">
+  <main class="blog-page">
+    <section class="blog-hero">
+      <h1>記事一覧</h1>
+      <p>
+        PostgreSQL のSQL、設計、運用、性能改善、エラー対応に関する記事をまとめています。
+      </p>
+    </section>
+
+    <section class="post-list" aria-label="記事一覧">
+      {posts.length === 0 ? (
+        <p class="empty-message">まだ記事がありません。</p>
+      ) : (
+        posts.map((post) => (
+          <article class="post-card">
+            <div class="post-meta">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatDate(post.data.pubDate)}
+              </time>
+              <span class="category">{post.data.category}</span>
+            </div>
+
+            <h2>
+              <a href={`/blog/${post.id}/`}>
+                {post.data.title}
+              </a>
+            </h2>
+
+            <p class="description">
+              {post.data.description}
+            </p>
+
+            {post.data.tags.length > 0 && (
+              <ul class="tag-list" aria-label="タグ">
+                {post.data.tags.map((tag) => (
+                  <li>{tag}</li>
+                ))}
+              </ul>
+            )}
+          </article>
+        ))
+      )}
+    </section>
   </main>
 </BaseLayout>
+
